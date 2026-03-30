@@ -14,7 +14,10 @@ State-Driven Metrics: A specialized logic engine that tracks user precision and 
 
 ## 🚦 Getting Started
 ### Prerequisites
-Node.js: v18.x or higherAPI Keys: Bhashini API (for voice) and Supabase (for data persistence).
+Node.js: v18.x or higher
+
+API Keys: Bhashini API (for voice) and Supabase (for data persistence).
+
 Browser: Chrome or Firefox (iOS requires Safari with WebXR flags enabled).
 
 ### Installation
@@ -25,11 +28,13 @@ cd prism
 npm install
 #### Environment Setup:
 Create a .env file in the root directory:
+
 VITE_BHASHINI_API_KEY=your_key_here
 VITE_SUPABASE_URL=your_url
 VITE_SUPABASE_ANON_KEY=your_key
 ### Run Development Server:
 npm run dev
+
 Access the application at http://localhost:5173.
 
 ## 🧩 Project Structure
@@ -39,6 +44,7 @@ Access the application at http://localhost:5173.
 ## ⚙️ Core Logic: 
 The Skill-Metric EngineThe platform doesn't just track completion; it calculates a Precision Score (P) based on the distance (d) and rotation (r) of the 3D entity relative to its correct target coordinates:
 <img width="321" height="93" alt="image" src="https://github.com/user-attachments/assets/b09bf3e9-6de9-4968-abf8-41e4e3509e80" />
+
 If P falls below a threshold during high-risk steps (e.g., battery contact), the state engine triggers a "Safety Violation" event, pausing the simulation and providing audio feedback in the user's selected language.
 
 ## 🤝 Contributing
