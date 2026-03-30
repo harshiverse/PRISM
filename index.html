@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>PRISM — Precision Interactive Skill Mastery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg-deep:     #020c1b;
+      --bg-mid:      #071428;
+      --bg-surface:  #0c1f3a;
+      --bg-card:     #091625;
+      --saffron:     #FF9933;
+      --amber:       #FFB347;
+      --gold:        #FFD700;
+      --cyan:        #00E5FF;
+      --teal:        #00BFA5;
+      --green:       #00E676;
+      --red:         #FF1744;
+      --txt1:        #E8F4FD;
+      --txt2:        #7BACC8;
+      --txt3:        #3A5A7A;
+      --border:      rgba(0,229,255,0.12);
+      --glow-s:      0 0 24px rgba(255,153,51,0.35);
+      --glow-c:      0 0 20px rgba(0,229,255,0.28);
+      --ff-h:        'Rajdhani', sans-serif;
+      --ff-b:        'IBM Plex Sans', sans-serif;
+      --ff-m:        'Space Mono', monospace;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    html, body {
+      font-family: var(--ff-b);
+      background: var(--bg-deep);
+      color: var(--txt1);
+      overflow: hidden;
+      height: 100vh; width: 100vw;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width:3px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius:2px; }
+
+    /* ── ANIMATED GRID BG ── */
+    .grid-bg {
+      position:fixed; inset:0; z-index:0; pointer-events:none;
+      background: var(--bg-deep);
+      overflow: hidden;
+    }
+    .grid-bg::before {
+      content:'';
+      position:absolute; inset:-40px;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridDrift 24s linear infinite;
+    }
+    @keyframes gridDrift { to { transform: translateY(48px); } }
+    .grid-bg::after {
+      content:'';
+      position:absolute; top:0; left:0; right:0; bottom:0;
+      background:
+        radial-gradient(ellipse 60% 45% at 15% 25%, rgba(255,153,51,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 85% 70%, rgba(0,229,255,0.06) 0%, transparent 70%);
+      animation: orbs 8s ease-in-out infinite alternate;
+    }
+    @keyframes orbs {
+      from { opacity:0.6; }
+      to   { opacity:1; }
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      position:fixed; inset:0; z-index:10;
+      display:none; opacity:0;
+      flex-direction:column;
+      transition: opacity 0.45s ease;
+    }
+    .screen.active { display:flex; opacity:1; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(22px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .anim { animation: fadeUp 0.55s ease forwards; opacity:0; }
+    .d1 { animation-delay:.08s; }
+    .d2 { animation-delay:.18s; }
+    .d3 { animation-delay:.28s; }
+    .d4 { animation-delay:.4s; }
+    .d5 { animation-delay:.52s; }
+
+    /* ══════════════════════════════
+       SCREEN 1 — LANDING
+    ══════════════════════════════ */
+    #s-land {
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .land-inner {
+      position:relative; z-index:1;
+      display:flex; flex-direction:column;
+      align-items:center; text-align:center;
+      padding: 2rem 1.5rem;
+      gap: 0;
+    }
+
+    /* Hexagon logo */
+    .hex-wrap {
+      width:130px; height:130px;
+      position:relative; margin-bottom:1.8rem;
+    }
+    .hex-outer {
+      width:100%; height:100%;
+      animation: spinSlow 14s linear infinite;
+      filter: drop-shadow(0 0 18px rgba(0,229,255,0.45));
+    }
+    .hex-inner-icon {
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .hex-inner-icon svg {
+      width:58px; height:58px;
+      animation: spinSlow 14s linear infinite reverse;
+      filter: drop-shadow(0 0 10px rgba(255,153,51,0.7));
+    }
+    @keyframes spinSlow { to { transform:rotate(360deg); } }
+
+    .wordmark {
+      font-family: var(--ff-h);
+      font-size: clamp(3.2rem, 8vw, 5.5rem);
+      font-weight:700;
+      letter-spacing:.3em;
+      background: linear-gradient(135deg, var(--saffron) 0%, var(--gold) 45%, var(--cyan) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+      filter: drop-shadow(0 0 30px rgba(255,153,51,0.25));
+      line-height:1; margin-bottom:.35rem;
+    }
+    .tagline-sub {
+      font-family: var(--ff-h);
+      font-size:.8rem; letter-spacing:.22em;
+      color: var(--txt2); text-transform:uppercase;
+      margin-bottom:1.2rem;
+    }
+    .deco-bar {
+      width:180px; height:1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      margin:.2rem auto 1.2rem;
+    }
+    .hero-copy {
+      font-size:1rem; color:var(--txt2);
+      max-width:480px; line-height:1.75;
+      font-weight:300; margin-bottom:1.6rem;
+    }
+    /* Language pills */
+    .lang-pills {
+      display:flex; gap:.4rem; flex-wrap:wrap;
+      justify-content:center; margin-bottom:1.8rem;
+    }
+    .lp {
+      padding:.35rem .85rem;
+      border:1px solid var(--border);
+      background:transparent; color:var(--txt2);
+      border-radius:20px; cursor:pointer;
+      font-family:var(--ff-b); font-size:.78rem;
+      transition:all .2s ease;
+    }
+    .lp:hover, .lp.on {
+      border-color:var(--saffron); color:var(--saffron);
+      background:rgba(255,153,51,0.1);
+      box-shadow: var(--glow-s);
+    }
+    /* CTA */
+    .cta {
+      position:relative; padding:.95rem 2.8rem;
+      font-family:var(--ff-h); font-size:1.15rem;
+      font-weight:600; letter-spacing:.15em;
+      text-transform:uppercase;
+      color:var(--saffron); background:transparent;
+      border:2px solid var(--saffron);
+      cursor:pointer; overflow:hidden;
+      clip-path:polygon(14px 0%,100% 0%,calc(100% - 14px) 100%,0% 100%);
+      transition: color .28s ease;
+    }
+    .cta::before {
+      content:''; position:absolute; inset:0;
+      background:var(--saffron);
+      transform:scaleX(0); transform-origin:left;
+      transition:transform .28s ease;
+    }
+    .cta:hover::before { transform:scaleX(1); }
+    .cta:hover { color:var(--bg-deep); }
+    .cta span { position:relative; z-index:1; }
+    /* Stats */
+    .stat-row {
+      display:flex; gap:3.5rem;
+      margin-top:2.5rem;
+    }
+    .stat { text-align:center; }
+    .stat-n {
+      font-family:var(--ff-h); font-size:2.1rem;
+      font-weight:700; color:var(--cyan);
+      line-height:1;
+    }
+    .stat-l {
+      font-size:.68rem; color:var(--txt3);
+      text-transform:uppercase; letter-spacing:.12em;
+      margin-top:.15rem;
+    }
+
+    /* ══════════════════════════════
+       SCREEN 2 — MODULE SELECT
+    ══════════════════════════════ */
+    #s-mods { overflow:hidden; }
+    .topbar {
+      display:flex; align-items:center;
+      justify-content:space-between;
+      padding:.9rem 1.8rem;
+      border-bottom:1px solid var(--border);
+      background:rgba(7,20,40,0.82);
+      backdrop-filter:blur(12px);
+      flex-shrink:0;
+    }
+    .topbar-logo {
+      font-family:var(--ff-h); font-size:1.45rem;
+      font-weight:700; letter-spacing:.18em;
+      background:linear-gradient(90deg,var(--saffron),var(--gold));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .topbar-right { display:flex; gap:.8rem; align-items:center; }
+    .sm-btn {
+      padding:.35rem .75rem;
+      background:transparent; border:1px solid var(--border);
+      color:var(--txt2); font-size:.78rem;
+      cursor:pointer; border-radius:3px;
+      font-family:var(--ff-b);
+      transition:all .2s;
+    }
+    .sm-btn:hover { border-color:var(--txt2); color:var(--txt1); }
+
+    .mods-scroll { flex:1; overflow-y:auto; padding:1.8rem; }
+    .mods-head { margin-bottom:1.8rem; }
+    .mods-head h2 {
+      font-family:var(--ff-h); font-size:2.2rem;
+      font-weight:600; letter-spacing:.02em;
+    }
+    .mods-head p { color:var(--txt2); font-size:.9rem; margin-top:.35rem; }
+
+    .mods-grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px,1fr));
+      gap:1.2rem; max-width:1100px;
+    }
+    .mod-card {
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:3px; padding:1.4rem;
+      cursor:pointer; transition:all .28s;
+      position:relative; overflow:hidden;
+    }
+    .mod-card::after {
+      content:''; position:absolute;
+      top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,var(--saffron),var(--gold));
+      transform:scaleX(0); transition:transform .28s;
+    }
+    .mod-card:hover {
+      border-color:rgba(255,153,51,.35);
+      transform:translateY(-4px);
+      box-shadow: 0 10px 32px rgba(0,0,0,.35), var(--glow-s);
+    }
+    .mod-card:hover::after { transform:scaleX(1); }
+    .mod-card.sel {
+      border-color:var(--saffron);
+      box-shadow: var(--glow-s);
+    }
+    .mod-card.sel::after { transform:scaleX(1); }
+    .mod-card.locked { opacity:.45; cursor:default; }
+    .mod-card.locked:hover { transform:none; box-shadow:none; border-color:var(--border); }
+    .mod-card.locked:hover::after { transform:scaleX(0); }
+
+    .mod-icon {
+      width:44px; height:44px;
+      border-radius:3px; display:flex;
+      align-items:center; justify-content:center;
+      font-size:1.4rem; margin-bottom:.9rem;
+    }
+    .mod-card h3 {
+      font-family:var(--ff-h); font-size:1.15rem;
+      font-weight:600; margin-bottom:.4rem;
+    }
+    .mod-card p { font-size:.83rem; color:var(--txt2); line-height:1.55; }
+    .mod-tags { display:flex; gap:.35rem; margin-top:.9rem; flex-wrap:wrap; }
+    .tag {
+      padding:.18rem .55rem; border-radius:20px;
+      font-size:.68rem; font-family:var(--ff-m); border:1px solid;
+    }
+    .tc { border-color:var(--cyan); color:var(--cyan); }
+    .tg { border-color:var(--green); color:var(--green); }
+    .ta { border-color:var(--amber); color:var(--amber); }
+    .tr { border-color:var(--red); color:var(--red); }
+
+    /* ══════════════════════════════
+       SCREEN 3 — VR TRAINING
+    ══════════════════════════════ */
+    #s-vr { flex-direction:column; }
+    #afc { position:relative; flex:1; }
+    #vr-scene { width:100%; height:100%; }
+
+    /* HUD wrapper */
+    .hud { position:absolute; inset:0; pointer-events:none; z-index:200; }
+
+    /* ── Language Panel ── */
+    .h-lang {
+      position:absolute; top:14px; left:14px;
+      background:rgba(7,18,36,0.92);
+      border:1px solid var(--border);
+      backdrop-filter:blur(10px);
+      padding:.75rem .9rem; border-radius:3px;
+      pointer-events:all; min-width:130px;
+    }
+    .h-label {
+      font-family:var(--ff-m); font-size:.58rem;
+      color:var(--txt3); text-transform:uppercase;
+      letter-spacing:.12em; margin-bottom:.5rem;
+    }
+    .lo {
+      display:block; width:100%;
+      padding:.22rem .5rem;
+      background:transparent;
+      border:1px solid transparent;
+      color:var(--txt2); border-radius:2px;
+      cursor:pointer; font-family:var(--ff-b);
+      font-size:.72rem; text-align:left;
+      transition:all .18s; margin-bottom:.15rem;
+    }
+    .lo:hover, .lo.on {
+      border-color:var(--saffron); color:var(--saffron);
+      background:rgba(255,153,51,0.08);
+    }
+
+    /* ── Step dots ── */
+    .h-dots {
+      position:absolute; top:14px; left:50%;
+      transform:translateX(-50%);
+      display:flex; gap:.4rem; align-items:center;
+      background:rgba(7,18,36,0.88);
+      border:1px solid var(--border);
+      padding:.5rem .9rem; border-radius:20px;
+      backdrop-filter:blur(8px);
+    }
+    .dot {
+      width:7px; height:7px; border-radius:50%;
+      background:var(--txt3); transition:all .3s;
+    }
+    .dot.done { background:var(--green); }
+    .dot.now  { background:var(--saffron); transform:scale(1.45); box-shadow:0 0 7px var(--saffron); }
+
+    /* ── Skill Metrics ── */
+    .h-skill {
+      position:absolute; top:14px; right:14px;
+      background:rgba(7,18,36,0.92);
+      border:1px solid var(--border);
+      backdrop-filter:blur(10px);
+      padding:.9rem 1.05rem; border-radius:3px;
+      pointer-events:all; min-width:195px;
+    }
+    .mtr { display:flex; align-items:center; gap:.55rem; margin-bottom:.55rem; }
+    .mtr:last-child { margin-bottom:0; }
+    .mtr-lbl { font-family:var(--ff-m); font-size:.62rem; color:var(--txt2); width:58px; }
+    .mtr-track { flex:1; height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+    .mtr-fill  { height:100%; border-radius:2px; transition:width .5s ease; }
+    .mtr-val   { font-family:var(--ff-m); font-size:.7rem; width:28px; text-align:right; }
+    .timer-row {
+      margin-top:.7rem; padding-top:.6rem;
+      border-top:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .timer-row span:first-child { font-family:var(--ff-m); font-size:.6rem; color:var(--txt3); }
+    #hud-timer { font-family:var(--ff-m); font-size:.75rem; color:var(--saffron); }
+
+    /* ── Step Instruction Panel ── */
+    .h-step {
+      position:absolute; bottom:16px; left:50%;
+      transform:translateX(-50%);
+      background:rgba(7,18,36,0.94);
+      border:1px solid var(--border);
+      backdrop-filter:blur(14px);
+      padding:1.1rem 1.6rem;
+      width:92%; max-width:640px;
+      border-radius:3px; pointer-events:all;
+    }
+    .sn {
+      font-family:var(--ff-m); font-size:.65rem;
+      color:var(--saffron); letter-spacing:.1em; margin-bottom:.25rem;
+    }
+    .st {
+      font-family:var(--ff-h); font-size:1.35rem;
+      font-weight:600; margin-bottom:.2rem;
+    }
+    .si { font-size:.87rem; color:var(--txt2); line-height:1.55; }
+    .si-nat {
+      font-size:.95rem; color:var(--amber);
+      margin-top:.35rem; line-height:1.55;
+    }
+    .step-act {
+      display:flex; gap:.7rem; margin-top:.9rem; align-items:center;
+    }
+    .btn-speak {
+      display:flex; align-items:center; gap:.35rem;
+      padding:.42rem .9rem;
+      background:transparent; border:1px solid var(--cyan);
+      color:var(--cyan); font-family:var(--ff-b); font-size:.78rem;
+      cursor:pointer; border-radius:2px; transition:all .2s;
+    }
+    .btn-speak:hover { background:rgba(0,229,255,0.1); }
+    .btn-speak.active { background:rgba(0,229,255,0.15); animation:speakPulse 1s ease-in-out infinite; }
+    @keyframes speakPulse {
+      0%,100% { box-shadow:0 0 0 0 rgba(0,229,255,0.4); }
+      50%      { box-shadow:0 0 0 6px rgba(0,229,255,0); }
+    }
+    .btn-next {
+      padding:.42rem 1.4rem;
+      background:var(--saffron); color:var(--bg-deep);
+      border:none; font-family:var(--ff-h);
+      font-weight:600; font-size:.9rem;
+      letter-spacing:.1em; cursor:pointer;
+      clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+      transition:background .2s;
+    }
+    .btn-next:hover { background:var(--gold); }
+    .hint-txt {
+      margin-left:auto; font-size:.72rem;
+      color:var(--txt3); font-family:var(--ff-m);
+    }
+    /* Exit btn */
+    .btn-exit {
+      position:absolute; bottom:110px; left:14px;
+      padding:.42rem .9rem; background:transparent;
+      border:1px solid var(--border); color:var(--txt2);
+      font-size:.78rem; cursor:pointer; border-radius:2px;
+      pointer-events:all; font-family:var(--ff-b);
+      transition:all .2s;
+    }
+    .btn-exit:hover { border-color:var(--txt2); color:var(--txt1); }
+
+    /* ── Hotspot action glow ── */
+    #action-flash {
+      position:absolute; inset:0;
+      background:rgba(0,230,118,0.12);
+      opacity:0; pointer-events:none;
+      transition:opacity .3s;
+    }
+
+    /* ══════════════════════════════
+       SCREEN 4 — DASHBOARD
+    ══════════════════════════════ */
+    #s-dash { overflow:hidden; }
+    .dash-scroll { flex:1; overflow-y:auto; padding:1.8rem; }
+    .dash-inner { max-width:920px; margin:0 auto; }
+
+    .dash-head {
+      display:flex; justify-content:space-between;
+      align-items:flex-start; margin-bottom:1.8rem;
+    }
+    .dash-head h2 {
+      font-family:var(--ff-h); font-size:2rem;
+      font-weight:600; line-height:1.1;
+    }
+    .dash-head p { color:var(--txt2); font-size:.88rem; margin-top:.3rem; }
+    .dash-head small { color:var(--txt3); font-size:.75rem; }
+    .score-ring {
+      width:96px; height:96px; border-radius:50%;
+      border:2.5px solid var(--saffron);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      background:var(--bg-card);
+      box-shadow: var(--glow-s);
+      flex-shrink:0;
+    }
+    .score-n { font-family:var(--ff-h); font-size:1.9rem; font-weight:700; color:var(--saffron); line-height:1; }
+    .score-l { font-size:.6rem; color:var(--txt3); text-transform:uppercase; letter-spacing:.06em; }
+
+    .dash-grid {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:1.2rem; margin-bottom:1.2rem;
+    }
+    .dc {
+      background:var(--bg-card); border:1px solid var(--border);
+      border-radius:3px; padding:1.3rem;
+    }
+    .dc h3 {
+      font-family:var(--ff-h); font-size:.88rem;
+      font-weight:600; color:var(--txt2);
+      text-transform:uppercase; letter-spacing:.12em;
+      margin-bottom:1rem;
+    }
+    .perf-row {
+      display:flex; justify-content:space-between;
+      align-items:center; padding:.5rem 0;
+      border-bottom:1px solid var(--border);
+    }
+    .perf-row:last-child { border:none; }
+    .perf-name { font-size:.85rem; color:var(--txt2); }
+    .perf-right { display:flex; align-items:center; gap:.55rem; }
+    .pbar { width:72px; height:5px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; }
+    .pbf  { height:100%; border-radius:3px; }
+    .pval { font-family:var(--ff-m); font-size:.78rem; min-width:34px; text-align:right; }
+
+    .badge-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:.8rem;
+    }
+    .badge {
+      display:flex; flex-direction:column;
+      align-items:center; gap:.3rem;
+      padding:.7rem .4rem;
+      background:var(--bg-surface); border:1px solid var(--border);
+      border-radius:3px; text-align:center;
+    }
+    .badge.e { border-color:var(--gold); background:rgba(255,215,0,0.05); }
+    .badge-ico { font-size:1.6rem; }
+    .badge-lbl { font-size:.62rem; color:var(--txt3); font-family:var(--ff-m); }
+    .badge.e .badge-lbl { color:var(--gold); }
+    .fw { grid-column:1/-1; }
+    .dash-actions {
+      display:flex; gap:.9rem; flex-wrap:wrap;
+      align-items:center; margin-top:1.3rem;
+    }
+    .btn-retry {
+      padding:.7rem 1.8rem; background:transparent;
+      color:var(--cyan); border:1px solid var(--cyan);
+      font-family:var(--ff-h); font-size:.95rem;
+      letter-spacing:.1em; cursor:pointer; transition:all .2s;
+    }
+    .btn-retry:hover { background:rgba(0,229,255,0.08); box-shadow:var(--glow-c); }
+    .btn-nm {
+      padding:.7rem 1.8rem;
+      background:var(--saffron); color:var(--bg-deep);
+      border:none; font-family:var(--ff-h);
+      font-weight:600; font-size:.95rem;
+      letter-spacing:.1em; cursor:pointer;
+      clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+      transition:background .2s;
+    }
+    .btn-nm:hover { background:var(--gold); }
+    .time-info {
+      margin-left:auto; display:flex;
+      align-items:center; gap:.5rem;
+    }
+    .time-info span:first-child { font-size:.72rem; color:var(--txt3); font-family:var(--ff-m); }
+
+    /* ── TOAST ── */
+    .toast {
+      position:fixed; top:18px; right:18px;
+      background:var(--bg-surface);
+      border:1px solid var(--green);
+      color:var(--green); padding:.65rem 1.1rem;
+      border-radius:3px; font-size:.8rem;
+      font-family:var(--ff-m); z-index:9999;
+      transform:translateX(280px); opacity:0;
+      transition:all .28s ease; white-space:nowrap;
+    }
+    .toast.show { transform:translateX(0); opacity:1; }
+    .toast.warn { border-color:var(--amber); color:var(--amber); }
+    .toast.err  { border-color:var(--red); color:var(--red); }
+
+    /* ── Bhashini badge ── */
+    .bhashini-badge {
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.2rem .6rem;
+      border:1px solid rgba(0,229,255,.25);
+      border-radius:20px; font-size:.68rem;
+      color:var(--txt3); font-family:var(--ff-m);
+      margin-left:.5rem;
+    }
+    .bhashini-badge .dot-live {
+      width:5px; height:5px; border-radius:50%;
+      background:var(--green);
+      animation:blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:.4} 50%{opacity:1} }
+  </style>
+</head>
+<body>
+
+<!-- Background always-on -->
+<div class="grid-bg"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 1 · LANDING
+════════════════════════════════════════════ -->
+<div class="screen active" id="s-land">
+  <div class="land-inner">
+
+    <!-- Hex logo -->
+    <div class="hex-wrap anim d1">
+      <svg class="hex-outer" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hg1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"   stop-color="#FF9933"/>
+            <stop offset="100%" stop-color="#00E5FF"/>
+          </linearGradient>
+        </defs>
+        <polygon points="50,4 96,27 96,73 50,96 4,73 4,27"
+          stroke="url(#hg1)" stroke-width="1.8" fill="none"/>
+        <polygon points="50,14 86,33 86,67 50,86 14,67 14,33"
+          stroke="rgba(0,229,255,0.22)" stroke-width="1" fill="none" stroke-dasharray="5 5"/>
+        <polygon points="50,24 76,39 76,61 50,76 24,61 24,39"
+          stroke="rgba(255,153,51,0.18)" stroke-width="1" fill="none" stroke-dasharray="3 8"/>
+      </svg>
+      <div class="hex-inner-icon">
+        <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="30,5 55,30 30,55 5,30"
+            fill="none" stroke="#FF9933" stroke-width="1.8"/>
+          <polygon points="30,14 46,30 30,46 14,30"
+            fill="rgba(255,153,51,0.12)" stroke="#FFD700" stroke-width="1"/>
+          <circle cx="30" cy="30" r="5" fill="#FF9933"/>
+          <line x1="30" y1="14" x2="30" y2="46" stroke="rgba(255,215,0,0.4)" stroke-width=".8"/>
+          <line x1="14" y1="30" x2="46" y2="30" stroke="rgba(255,215,0,0.4)" stroke-width=".8"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="wordmark anim d2">PRISM</div>
+    <div class="tagline-sub anim d2">Precision Interactive Skill Mastery</div>
+    <div class="deco-bar anim d3"></div>
+
+    <p class="hero-copy anim d3">
+      Zero-install WebXR vocational training with real-time multilingual AI coaching
+      via Bhashini API — built for India's next-generation workforce.
+    </p>
+
+    <div class="lang-pills anim d4" id="land-langs">
+      <button class="lp on"  onclick="setLang('en',this)">English</button>
+      <button class="lp"     onclick="setLang('hi',this)">हिंदी</button>
+      <button class="lp"     onclick="setLang('ta',this)">தமிழ்</button>
+      <button class="lp"     onclick="setLang('bn',this)">বাংলা</button>
+      <button class="lp"     onclick="setLang('te',this)">తెలుగు</button>
+      <button class="lp"     onclick="setLang('mr',this)">मराठी</button>
+    </div>
+
+    <button class="cta anim d5" onclick="goTo('s-mods')">
+      <span>⚡ &nbsp;BEGIN TRAINING</span>
+    </button>
+
+    <div class="stat-row anim d5">
+      <div class="stat"><div class="stat-n">22+</div><div class="stat-l">Languages</div></div>
+      <div class="stat"><div class="stat-n">8</div><div class="stat-l">Sectors</div></div>
+      <div class="stat"><div class="stat-n">₹0</div><div class="stat-l">Install Cost</div></div>
+      <div class="stat"><div class="stat-n">∞</div><div class="stat-l">Retries</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 2 · MODULE SELECT
+════════════════════════════════════════════ -->
+<div class="screen" id="s-mods">
+  <div class="topbar">
+    <div class="topbar-logo">PRISM</div>
+    <div class="topbar-right">
+      <span style="font-size:.78rem;color:var(--txt3);font-family:var(--ff-m)" id="lang-badge">EN · English</span>
+      <span class="bhashini-badge"><span class="dot-live"></span>Bhashini</span>
+      <button class="sm-btn" onclick="goTo('s-land')">← Home</button>
+    </div>
+  </div>
+  <div class="mods-scroll">
+    <div class="mods-head anim">
+      <h2>Select Training Module</h2>
+      <p>Choose a vocational sector to enter the immersive VR simulation</p>
+    </div>
+    <div class="mods-grid">
+
+      <!-- HEALTHCARE — active -->
+      <div class="mod-card sel anim d1" onclick="launchVR()">
+        <div class="mod-icon" style="background:rgba(255,23,68,.12);color:var(--red)">🏥</div>
+        <h3>Healthcare &amp; First Aid</h3>
+        <p>Master CPR, emergency response, and BLS procedures through a fully immersive hospital simulation.</p>
+        <div class="mod-tags">
+          <span class="tag tc">WebXR</span>
+          <span class="tag ta">Beginner–Pro</span>
+          <span class="tag tg">9 Steps</span>
+          <span class="tag tr">Live</span>
+        </div>
+      </div>
+
+      <div class="mod-card locked anim d2">
+        <div class="mod-icon" style="background:rgba(255,215,0,.1);color:var(--gold)">☀️</div>
+        <h3>Renewable Energy</h3>
+        <p>Solar panel installation, wind turbine maintenance and high-voltage safety protocols.</p>
+        <div class="mod-tags"><span class="tag tc">Coming Soon</span></div>
+      </div>
+
+      <div class="mod-card locked anim d3">
+        <div class="mod-icon" style="background:rgba(0,229,255,.08);color:var(--cyan)">⚙️</div>
+        <h3>Advanced Manufacturing</h3>
+        <p>CNC operations, quality control, and Industry 4.0 assembly line procedures.</p>
+        <div class="mod-tags"><span class="tag tc">Coming Soon</span></div>
+      </div>
+
+      <div class="mod-card locked anim d4">
+        <div class="mod-icon" style="background:rgba(0,191,165,.1);color:var(--teal)">🏗️</div>
+        <h3>Construction &amp; Safety</h3>
+        <p>Scaffolding, electrical wiring, plumbing and worksite compliance training.</p>
+        <div class="mod-tags"><span class="tag tc">Coming Soon</span></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 3 · VR TRAINING
+════════════════════════════════════════════ -->
+<div class="screen" id="s-vr">
+
+  <!-- A-Frame scene -->
+  <div id="afc">
+    <a-scene id="vr-scene"
+      embedded
+      renderer="colorManagement:true; physicallyCorrectLights:true; antialias:true"
+      vr-mode-ui="enabled:true"
+      loading-screen="dotsColor:#FF9933; backgroundColor:#020c1b"
+      style="width:100%;height:100vh;">
+
+      <a-assets>
+        <a-mixin id="glow-pulse"
+          animation__a="property:material.emissiveIntensity;from:0.2;to:0.8;dur:900;dir:alternate;loop:true;easing:easeInOutSine">
+        </a-mixin>
+      </a-assets>
+
+      <!-- Environment -->
+      <a-sky color="#06101e"></a-sky>
+
+      <!-- Floor -->
+      <a-plane position="0 0 0" rotation="-90 0 0" width="22" height="22"
+        material="color:#0b1928; roughness:0.85; metalness:0.15">
+      </a-plane>
+      <!-- Floor grid overlay -->
+      <a-plane position="0 0.003 0" rotation="-90 0 0" width="22" height="22"
+        material="color:#00E5FF; opacity:0.04; wireframe:true">
+      </a-plane>
+
+      <!-- Back wall -->
+      <a-plane position="0 3.5 -8" width="22" height="7"
+        material="color:#071422; roughness:0.95">
+      </a-plane>
+      <!-- Side walls -->
+      <a-plane position="-8 3.5 0" rotation="0 90 0" width="16" height="7"
+        material="color:#071422; roughness:0.95">
+      </a-plane>
+      <a-plane position="8 3.5 0" rotation="0 -90 0" width="16" height="7"
+        material="color:#071422; roughness:0.95">
+      </a-plane>
+
+      <!-- Emergency banner -->
+      <a-entity position="0 6.2 -7.8">
+        <a-plane width="10" height="0.7"
+          material="color:#FF1744; opacity:0.18; emissive:#FF1744; emissiveIntensity:0.15">
+        </a-plane>
+        <a-text value="EMERGENCY SIMULATION  ·  CPR FIRST AID TRAINING  ·  PRISM HEALTHCARE MODULE"
+          position="0 0 0.02" align="center" color="#FF6B6B" scale="0.45 0.45 0.45"
+          wrap-count="80">
+        </a-text>
+      </a-entity>
+
+      <!-- Ceiling light strips -->
+      <a-plane position="0 7 -4" rotation="90 0 0" width="6" height="0.3"
+        material="color:#E0F0FF; emissive:#E0F0FF; emissiveIntensity:0.6; opacity:0.9">
+      </a-plane>
+      <a-plane position="0 7 -2" rotation="90 0 0" width="6" height="0.3"
+        material="color:#E0F0FF; emissive:#E0F0FF; emissiveIntensity:0.6; opacity:0.9">
+      </a-plane>
+
+      <!-- Lighting -->
+      <a-light type="ambient" color="#0d2545" intensity="0.7"></a-light>
+      <a-light type="directional" position="1 8 4" color="#D8ECFF" intensity="0.75"></a-light>
+      <a-light type="point" position="-3 4 0" color="#FF9933" intensity="0.25" distance="12"></a-light>
+      <a-light type="point" position="3 4 -5" color="#00E5FF" intensity="0.2" distance="10"></a-light>
+
+      <!-- ════ PATIENT (lying) ════ -->
+      <a-entity id="patient" position="0 0 -3.2">
+        <!-- Torso -->
+        <a-box id="p-torso" position="0 0.14 0" width="0.52" height="0.28" depth="1.3"
+          material="color:#E5C09A; roughness:0.9; metalness:0">
+        </a-box>
+        <!-- Head -->
+        <a-sphere position="0 0.18 0.8" radius="0.17"
+          material="color:#E5C09A; roughness:0.88">
+        </a-sphere>
+        <!-- Hair -->
+        <a-sphere position="0 0.28 0.8" radius="0.16" scale="1 0.5 1"
+          material="color:#3D2000; roughness:0.95">
+        </a-sphere>
+        <!-- Arms -->
+        <a-box position=" 0.37 0.1 0.12" width="0.15" height="0.12" depth="0.85"
+          material="color:#E5C09A; roughness:0.9">
+        </a-box>
+        <a-box position="-0.37 0.1 0.12" width="0.15" height="0.12" depth="0.85"
+          material="color:#E5C09A; roughness:0.9">
+        </a-box>
+        <!-- Legs -->
+        <a-box position=" 0.15 0.1 -0.65" width="0.22" height="0.14" depth="0.95"
+          material="color:#2D4A7A; roughness:0.9">
+        </a-box>
+        <a-box position="-0.15 0.1 -0.65" width="0.22" height="0.14" depth="0.95"
+          material="color:#2D4A7A; roughness:0.9">
+        </a-box>
+        <!-- Shoes -->
+        <a-box position=" 0.15 0.07 -1.18" width="0.2" height="0.1" depth="0.22"
+          material="color:#1a1a2e; roughness:0.9">
+        </a-box>
+        <a-box position="-0.15 0.07 -1.18" width="0.2" height="0.1" depth="0.22"
+          material="color:#1a1a2e; roughness:0.9">
+        </a-box>
+
+        <!-- CHEST HOTSPOT (interactive) -->
+        <a-cylinder id="chest-hs" class="clickable"
+          position="0 0.31 0.12" radius="0.18" height="0.06"
+          material="color:#FF1744; opacity:0.55; emissive:#FF1744; emissiveIntensity:0.3"
+          animation__p="property:material.opacity;from:0.3;to:0.75;dur:700;dir:alternate;loop:true"
+          animation__s="property:scale;from:1 1 1;to:1.05 1 1.05;dur:700;dir:alternate;loop:true"
+          onclick="onHotspot('chest')">
+        </a-cylinder>
+        <a-ring id="chest-ring" position="0 0.32 0.12"
+          rotation="-90 0 0" radius-inner="0.2" radius-outer="0.24"
+          material="color:#FF1744; opacity:0.4; emissive:#FF1744; emissiveIntensity:0.2"
+          animation="property:rotation;to:-90 360 0;dur:4000;loop:true;easing:linear">
+        </a-ring>
+        <a-text id="chest-lbl"
+          value="▼ Interact\nChest" position="0 0.6 0.12"
+          align="center" color="#FF6B6B" scale="0.3 0.3 0.3">
+        </a-text>
+      </a-entity>
+
+      <!-- ════ AED DEVICE ════ -->
+      <a-entity id="aed" position="2.8 0 -2.4">
+        <!-- Stand -->
+        <a-cylinder position="0 0.35 0" radius="0.035" height="0.7" color="#445566"></a-cylinder>
+        <!-- Body -->
+        <a-box class="clickable" position="0 0.72 0"
+          width="0.42" height="0.32" depth="0.16"
+          material="color:#E85500; roughness:0.35; metalness:0.5"
+          onclick="onHotspot('aed')">
+        </a-box>
+        <!-- Screen -->
+        <a-plane position="0 0.74 0.085" width="0.26" height="0.16"
+          material="color:#00E5FF; opacity:0.85; emissive:#00E5FF; emissiveIntensity:0.35">
+        </a-plane>
+        <a-text value="AED" position="0 0.74 0.09" align="center" color="#fff" scale="0.26 0.26 0.26"></a-text>
+        <!-- Ground ring -->
+        <a-cylinder position="0 0.01 0" radius="0.2" height="0.025"
+          material="color:#FF9933; opacity:0.45; emissive:#FF9933; emissiveIntensity:0.2"
+          animation__p="property:material.opacity;from:0.25;to:0.7;dur:1100;dir:alternate;loop:true">
+        </a-cylinder>
+        <a-text value="AED\n▼ Interact" position="0 1.1 0"
+          align="center" color="#FF9933" scale="0.3 0.3 0.3">
+        </a-text>
+      </a-entity>
+
+      <!-- ════ FIRST AID KIT ════ -->
+      <a-entity id="kit" position="-2.8 0 -2">
+        <a-box class="clickable" position="0 0.6 0"
+          width="0.42" height="0.32" depth="0.28"
+          material="color:#CC2222; roughness:0.55; metalness:0.1"
+          onclick="onHotspot('kit')">
+        </a-box>
+        <!-- White cross -->
+        <a-plane position="0 0.6 0.145" width="0.07" height="0.22" material="color:#fff; opacity:0.95"></a-plane>
+        <a-plane position="0 0.6 0.145" width="0.22" height="0.07" material="color:#fff; opacity:0.95"></a-plane>
+        <!-- Ground ring -->
+        <a-cylinder position="0 0.01 0" radius="0.18" height="0.025"
+          material="color:#CC2222; opacity:0.4; emissive:#CC2222; emissiveIntensity:0.2"
+          animation__p="property:material.opacity;from:0.2;to:0.65;dur:950;dir:alternate;loop:true">
+        </a-cylinder>
+        <a-text value="First Aid Kit\n▼ Interact" position="0 1.05 0"
+          align="center" color="#EF4444" scale="0.28 0.28 0.28">
+        </a-text>
+      </a-entity>
+
+      <!-- Success ring (hidden, shown on correct action) -->
+      <a-entity id="success-fx" position="0 0.05 -3.2" visible="false">
+        <a-torus radius="0.85" radius-tubular="0.025"
+          material="color:#00E676; emissive:#00E676; emissiveIntensity:0.9; opacity:0.8"
+          animation="property:rotation;from:0 0 0;to:0 360 0;dur:1600;loop:true;easing:linear">
+        </a-torus>
+        <a-torus radius="0.7" radius-tubular="0.015"
+          material="color:#00E5FF; emissive:#00E5FF; emissiveIntensity:0.7; opacity:0.6"
+          animation="property:rotation;from:0 0 0;to:0 -360 0;dur:2200;loop:true;easing:linear">
+        </a-torus>
+      </a-entity>
+
+      <!-- Wall monitors -->
+      <a-plane position="-7.85 2.5 -2" rotation="0 90 0" width="3.5" height="2.2"
+        material="color:#071e3d; emissive:#071e3d; emissiveIntensity:0.4">
+      </a-plane>
+      <a-text value="SKILL-METRIC LIVE\nSafety    ██████████  100\nPrecision ████████░░   80\nSpeed     ███████░░░   72"
+        position="-7.75 2.5 -2" rotation="0 90 0" align="center"
+        color="#00E5FF" scale="0.3 0.3 0.3" wrap-count="35">
+      </a-text>
+
+      <!-- Camera rig -->
+      <a-entity id="rig" position="0 1.62 1.6">
+        <a-camera look-controls wasd-controls="enabled:true" fov="80">
+          <a-cursor
+            color="#FF9933" fuse="false"
+            raycaster="objects:.clickable"
+            material="color:#FF9933; shader:flat; opacity:0.85"
+            geometry="primitive:ring; radiusInner:0.012; radiusOuter:0.018">
+          </a-cursor>
+        </a-camera>
+      </a-entity>
+
+    </a-scene>
+
+    <!-- Action flash overlay -->
+    <div id="action-flash"></div>
+
+    <!-- ─────────── HUD ─────────── -->
+    <div class="hud">
+
+      <!-- Language panel -->
+      <div class="h-lang">
+        <div class="h-label">🌐 BHASHINI</div>
+        <div id="vr-langs">
+          <button class="lo on"  onclick="switchVRLang('en','English',this)">EN  English</button>
+          <button class="lo"     onclick="switchVRLang('hi','हिंदी',this)">HI  हिंदी</button>
+          <button class="lo"     onclick="switchVRLang('ta','தமிழ்',this)">TA  தமிழ்</button>
+          <button class="lo"     onclick="switchVRLang('bn','বাংলা',this)">BN  বাংলা</button>
+          <button class="lo"     onclick="switchVRLang('te','తెలుగు',this)">TE  తెలుగు</button>
+        </div>
+      </div>
+
+      <!-- Step dots -->
+      <div class="h-dots" id="h-dots"></div>
+
+      <!-- Skill metrics -->
+      <div class="h-skill">
+        <div class="h-label">⚡ SKILL-METRIC</div>
+        <div class="mtr">
+          <span class="mtr-lbl">SAFETY</span>
+          <div class="mtr-track"><div class="mtr-fill" id="m-safety" style="width:100%;background:var(--green)"></div></div>
+          <span class="mtr-val" id="v-safety" style="color:var(--green)">100</span>
+        </div>
+        <div class="mtr">
+          <span class="mtr-lbl">PRECISION</span>
+          <div class="mtr-track"><div class="mtr-fill" id="m-prec" style="width:100%;background:var(--cyan)"></div></div>
+          <span class="mtr-val" id="v-prec" style="color:var(--cyan)">100</span>
+        </div>
+        <div class="mtr">
+          <span class="mtr-lbl">SPEED</span>
+          <div class="mtr-track"><div class="mtr-fill" id="m-speed" style="width:78%;background:var(--amber)"></div></div>
+          <span class="mtr-val" id="v-speed" style="color:var(--amber)">78</span>
+        </div>
+        <div class="timer-row">
+          <span>ELAPSED</span>
+          <span id="hud-timer">00:00</span>
+        </div>
+      </div>
+
+      <!-- Step instruction panel -->
+      <div class="h-step">
+        <div class="sn" id="s-num">STEP 01 / 09</div>
+        <div class="st" id="s-title">Scene Safety Check</div>
+        <div class="si" id="s-instr">Look around your environment 360°. Ensure no hazards exist before approaching the patient.</div>
+        <div class="si-nat" id="s-nat" style="display:none"></div>
+        <div class="step-act">
+          <button class="btn-speak" id="btn-spk" onclick="speak()">🔊 <span id="spk-lbl">Speak</span></button>
+          <button class="btn-next" onclick="nextStep()">PROCEED →</button>
+          <span class="hint-txt" id="s-hint">Look around to continue</span>
+        </div>
+      </div>
+
+      <!-- Exit -->
+      <button class="btn-exit" onclick="goTo('s-mods')">← Exit Training</button>
+
+    </div><!-- end .hud -->
+  </div><!-- end #afc -->
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 4 · DASHBOARD
+════════════════════════════════════════════ -->
+<div class="screen" id="s-dash">
+  <div class="topbar">
+    <div class="topbar-logo">PRISM</div>
+    <div class="topbar-right">
+      <span style="font-size:.78rem;color:var(--txt3);font-family:var(--ff-m)" id="d-lang-badge">EN · English</span>
+      <button class="sm-btn" onclick="goTo('s-mods')">← Modules</button>
+    </div>
+  </div>
+  <div class="dash-scroll">
+    <div class="dash-inner">
+
+      <div class="dash-head anim">
+        <div>
+          <h2>Training Complete 🎉</h2>
+          <p>Healthcare &amp; First Aid — CPR Module</p>
+          <small id="d-sub">Language: English &nbsp;·&nbsp; Bhashini API</small>
+        </div>
+        <div class="score-ring">
+          <div class="score-n" id="d-score">87</div>
+          <div class="score-l">Skill Score</div>
+        </div>
+      </div>
+
+      <div class="dash-grid anim d1">
+
+        <!-- Perf breakdown -->
+        <div class="dc">
+          <h3>Performance Breakdown</h3>
+          <div class="perf-row">
+            <span class="perf-name">Safety Compliance</span>
+            <div class="perf-right">
+              <div class="pbar"><div class="pbf" id="pb-s" style="width:92%;background:var(--green)"></div></div>
+              <span class="pval" id="pv-s" style="color:var(--green)">92%</span>
+            </div>
+          </div>
+          <div class="perf-row">
+            <span class="perf-name">Compression Precision</span>
+            <div class="perf-right">
+              <div class="pbar"><div class="pbf" id="pb-p" style="width:85%;background:var(--cyan)"></div></div>
+              <span class="pval" id="pv-p" style="color:var(--cyan)">85%</span>
+            </div>
+          </div>
+          <div class="perf-row">
+            <span class="perf-name">Response Speed</span>
+            <div class="perf-right">
+              <div class="pbar"><div class="pbf" id="pb-sp" style="width:78%;background:var(--amber)"></div></div>
+              <span class="pval" id="pv-sp" style="color:var(--amber)">78%</span>
+            </div>
+          </div>
+          <div class="perf-row">
+            <span class="perf-name">Protocol Sequence</span>
+            <div class="perf-right">
+              <div class="pbar"><div class="pbf" id="pb-seq" style="width:100%;background:var(--green)"></div></div>
+              <span class="pval" id="pv-seq" style="color:var(--green)">100%</span>
+            </div>
+          </div>
+          <div class="perf-row">
+            <span class="perf-name">AED Deployment</span>
+            <div class="perf-right">
+              <div class="pbar"><div class="pbf" id="pb-aed" style="width:90%;background:var(--teal)"></div></div>
+              <span class="pval" id="pv-aed" style="color:var(--teal)">90%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="dc">
+          <h3>Badges Earned</h3>
+          <div class="badge-grid">
+            <div class="badge e"><span class="badge-ico">🛡️</span><span class="badge-lbl">Safety First</span></div>
+            <div class="badge e"><span class="badge-ico">⚡</span><span class="badge-lbl">Quick Response</span></div>
+            <div class="badge e"><span class="badge-ico">❤️</span><span class="badge-lbl">Life Saver</span></div>
+            <div class="badge"><span class="badge-ico">🏆</span><span class="badge-lbl" style="color:var(--txt3)">Gold Standard</span></div>
+            <div class="badge"><span class="badge-ico">⏱️</span><span class="badge-lbl" style="color:var(--txt3)">Speed Expert</span></div>
+            <div class="badge e"><span class="badge-ico">🔬</span><span class="badge-lbl">AED Certified</span></div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="dc fw">
+          <h3>Step-by-Step Performance</h3>
+          <canvas id="perf-chart" height="100"></canvas>
+        </div>
+
+      </div><!-- end dash-grid -->
+
+      <div class="dash-actions anim d2">
+        <button class="btn-retry" onclick="retryTraining()">↺ Retry Module</button>
+        <button class="btn-nm" onclick="goTo('s-mods')">→ Next Module</button>
+        <div class="time-info">
+          <span>COMPLETION TIME</span>
+          <span style="font-family:var(--ff-m);color:var(--saffron);font-size:.88rem" id="d-time">--:--</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT ENGINE
+════════════════════════════════════════════ -->
+<script>
+/* ─────────────────────────────────────────
+   STATE  (Zustand-pattern reactive store)
+───────────────────────────────────────── */
+const S = {
+  lang:      'en',
+  step:      0,
+  metrics:   { safety:100, precision:100, speed:78 },
+  clicks:    {},          // per-step click counter for multi-click steps
+  scores:    [],          // per-step recorded score
+  startTs:   null,
+  elapsed:   0,
+  timerID:   null,
+  speaking:  false,
+};
+
+/* ─────────────────────────────────────────
+   CPR TRAINING DATA
+───────────────────────────────────────── */
+const STEPS = [
+  {
+    title: "Scene Safety Check",
+    en:    "Look around your environment 360°. Ensure there are no hazards before approaching the patient. This protects both you and the victim.",
+    hint:  "Look around, then proceed",
+    hotspot: null,
+    translations: {
+      hi: "अपने आस-पास 360° देखें। मरीज़ के पास जाने से पहले सुनिश्चित करें कि कोई खतरा नहीं है।",
+      ta: "உங்கள் சூழலை 360° சுற்றிப் பாருங்கள். நோயாளியை அணுகுவதற்கு முன் ஆபத்துகள் எதுவும் இல்லை என்பதை உறுதிப்படுத்துங்கள்.",
+      bn: "আপনার পরিবেশ 360° দেখুন। রোগীর কাছে যাওয়ার আগে নিশ্চিত করুন যে কোনো বিপদ নেই।",
+      te: "మీ పరిసరాలను 360° చూడండి. రోగి దగ్గరకు వెళ్ళే ముందు ఎటువంటి ప్రమాదాలు లేవని నిర్ధారించుకోండి.",
+    }
+  },
+  {
+    title: "Check Responsiveness",
+    en:    "Tap the patient's shoulders firmly and call out 'Are you okay?' Check for any response or chest movement. Observe for no more than 10 seconds.",
+    hint:  "Click the patient to check",
+    hotspot: 'chest',
+    translations: {
+      hi: "रोगी के कंधों को ज़ोर से थपथपाएं और 'क्या आप ठीक हैं?' कहें। किसी प्रतिक्रिया की जांच करें। 10 सेकंड से अधिक नहीं।",
+      ta: "நோயாளியின் தோள்களை உறுதியாக தட்டி 'நீங்கள் சரியாக இருக்கிறீர்களா?' என்று கத்துங்கள். 10 விநாடிகளுக்கும் அதிகமாக இல்லை.",
+      bn: "রোগীর কাঁধে জোরে চাপড় দিন এবং 'আপনি কি ঠিক আছেন?' বলুন। ১০ সেকেন্ডের বেশি নয়।",
+      te: "రోగి భుజాలను గట్టిగా తట్టి 'మీరు పరవాలేదా?' అని అరవండి. 10 సెకన్లకు మించకుండా.",
+    }
+  },
+  {
+    title: "Call Emergency — 108",
+    en:    "Call 108 (India Emergency) immediately or instruct a bystander to call. Locate and bring the AED device to your right. Every second matters.",
+    hint:  "Interact with the AED →",
+    hotspot: 'aed',
+    translations: {
+      hi: "तुरंत 108 पर कॉल करें या किसी को निर्देश दें। AED डिवाइस लाएं। हर सेकंड मायने रखता है।",
+      ta: "உடனடியாக 108 அழையுங்கள் அல்லது யாரையாவது அழைக்க சொல்லுங்கள். AED கொண்டு வாருங்கள்.",
+      bn: "অবিলম্বে 108 কল করুন বা কাউকে ডাকুন। AED ডিভাইস আনুন।",
+      te: "వెంటనే 108 కు కాల్ చేయండి లేదా ఒకరిని కాల్ చేయమని చెప్పండి. AED పరికరం తీసుకురండి.",
+    }
+  },
+  {
+    title: "Position Hands for CPR",
+    en:    "Kneel beside the patient. Place the heel of your dominant hand on the lower half of the sternum. Interlock fingers. Keep arms straight.",
+    hint:  "Click the chest hotspot",
+    hotspot: 'chest',
+    translations: {
+      hi: "रोगी के बगल में घुटने टेकें। अपने प्रमुख हाथ की एड़ी को उरोस्थि के निचले आधे हिस्से पर रखें। उंगलियों को आपस में जोड़ें।",
+      ta: "நோயாளியின் பக்கத்தில் மண்டியிடுங்கள். உங்கள் முக்கிய கையின் குதிகாலை மார்பெலும்பின் கீழ் பாதியில் வையுங்கள்.",
+      bn: "রোগীর পাশে হাঁটু গেড়ে বসুন। আপনার প্রধান হাতের গোড়ালি স্টার্নামের নিচের অর্ধেকে রাখুন।",
+      te: "రోగి పక్కన మోకాళ్ళపై కూర్చోండి. మీ ప్రధాన చేతి మడమను స్టెర్నం యొక్క దిగువ భాగంలో ఉంచండి.",
+    }
+  },
+  {
+    title: "30 Chest Compressions",
+    en:    "Push down hard and fast — at least 5 cm (2 inches) deep, 100–120 compressions per minute. Count aloud. Allow chest to fully recoil between compressions.",
+    hint:  "Click chest 3× for 30 compressions",
+    hotspot: 'chest',
+    multiClick: 3,
+    translations: {
+      hi: "कम से कम 5 सेमी गहरा, 100-120 प्रति मिनट। ज़ोर से गिनें। प्रत्येक संपीड़न के बीच छाती को पूरी तरह से वापस आने दें।",
+      ta: "குறைந்தது 5 செமீ ஆழம், நிமிடத்திற்கு 100-120. சத்தமாக எண்ணுங்கள். ஒவ்வொரு அழுத்தத்திற்கும் இடையே மார்பு முழுவதுமாக மீளட்டும்.",
+      bn: "কমপক্ষে 5 সেমি গভীরে, প্রতি মিনিটে 100-120। জোরে গুনুন। প্রতিটি কম্প্রেশনের মধ্যে বুক সম্পূর্ণভাবে ফিরে আসতে দিন।",
+      te: "కనీసం 5 సెం.మీ. లోతుగా, నిమిషానికి 100-120. గట్టిగా లెక్కించండి. ప్రతి కంప్రెషన్ మధ్య ఛాతీ పూర్తిగా తిరిగి రానివ్వండి.",
+    }
+  },
+  {
+    title: "Open the Airway",
+    en:    "Tilt the head back and lift the chin (head-tilt chin-lift) to open the airway. Look, listen and feel for breathing — no more than 10 seconds.",
+    hint:  "Observe patient, then proceed",
+    hotspot: null,
+    translations: {
+      hi: "वायुमार्ग खोलने के लिए सिर को पीछे झुकाएं और ठुड्डी को ऊपर उठाएं। सांस के लिए देखें, सुनें और महसूस करें — 10 सेकंड से अधिक नहीं।",
+      ta: "காற்றுப்பாதையை திறக்க தலையை பின்னோக்கி சாய்த்து கன்னத்தை உயர்த்துங்கள். மூச்சுக்காக பாருங்கள், கேளுங்கள், உணருங்கள் — 10 விநாடிகளுக்கும் அதிகமில்லை.",
+      bn: "বায়ুপথ খুলতে মাথা পিছনে কাত করুন এবং চিবুক তুলুন। শ্বাসের জন্য দেখুন, শুনুন এবং অনুভব করুন।",
+      te: "శ్వాసనాళం తెరవడానికి తల వెనక్కి వంచి గడ్డాన్ని పైకి ఎత్తండి. శ్వాస కోసం చూడండి, వినండి మరియు అనుభవించండి.",
+    }
+  },
+  {
+    title: "Give 2 Rescue Breaths",
+    en:    "Pinch the nose shut, create a seal over the mouth and give 2 breaths of 1 second each. Watch for chest rise. If first breath fails, reposition head.",
+    hint:  "Click patient head area",
+    hotspot: 'chest',
+    translations: {
+      hi: "नाक बंद करें, मुंह पर मुहर बनाएं और 1-1 सेकंड की 2 सांस दें। छाती के उठने को देखें। यदि पहली सांस विफल हो, तो सिर पुनः स्थापित करें।",
+      ta: "மூக்கை கிள்ளி மூடுங்கள், வாயில் முத்திரை உருவாக்கி 1 விநாடி வீதம் 2 மூச்சு கொடுங்கள். மார்பு உயர்வைப் பாருங்கள்.",
+      bn: "নাক চেপে ধরুন, মুখে সীল তৈরি করুন এবং প্রতিটি 1 সেকেন্ডের 2টি শ্বাস দিন। বুক ওঠার দিকে লক্ষ্য রাখুন।",
+      te: "ముక్కును మూయండి, నోటిపై మూత పెట్టి ప్రతి 1 సెకను చొప్పున 2 శ్వాసలు ఇవ్వండి. ఛాతీ పెరగడం చూడండి.",
+    }
+  },
+  {
+    title: "Apply AED Pads",
+    en:    "Turn on the AED. Attach one pad to the upper-right chest, one to the lower-left. Follow AED voice prompts exactly. Ensure everyone stands clear before shock.",
+    hint:  "Interact with the AED device",
+    hotspot: 'aed',
+    translations: {
+      hi: "AED चालू करें। ऊपरी दाईं छाती पर एक पैड, निचले बाईं ओर एक पैड। AED की आवाज़ निर्देशों का पालन करें। शॉक से पहले दूर रहें।",
+      ta: "AED ஐ இயக்குங்கள். மேல் வலது மார்பில் ஒரு திட்டை, கீழ் இடதுபுறத்தில் ஒரு திட்டை. AED வாய்மொழி வழிமுறைகளைப் பின்பற்றுங்கள்.",
+      bn: "AED চালু করুন। উপরের ডান বুকে একটি প্যাড, নিচের বামে একটি প্যাড। AED ভয়েস প্রম্পট অনুসরণ করুন।",
+      te: "AED ను ఆన్ చేయండి. పై కుడి ఛాతీకి ఒక ప్యాడ్, కింది ఎడమకు ఒక ప్యాడ్. AED వాయిస్ ప్రాంప్ట్‌లను అనుసరించండి.",
+    }
+  },
+  {
+    title: "Continue CPR Cycles",
+    en:    "Resume 30 compressions : 2 breaths rhythm. Continue until AED advises to stop, professional help arrives, or the patient shows signs of life. Outstanding work!",
+    hint:  "Click chest — final step!",
+    hotspot: 'chest',
+    translations: {
+      hi: "30 कंप्रेशन : 2 सांस की लय जारी रखें। AED की सलाह, पेशेवर मदद आने या जीवन के संकेत दिखने तक जारी रखें। शानदार काम!",
+      ta: "30 அழுத்தங்கள் : 2 மூச்சு தாளத்தை மீண்டும் தொடங்குங்கள். AED ஆலோசனை, தொழில்முறை உதவி வரும் வரை அல்லது நோயாளி உயிரின் அறிகுறிகளைக் காட்டும் வரை தொடருங்கள்.",
+      bn: "30 কম্প্রেশন : 2 শ্বাসের তাল পুনরায় শুরু করুন। AED পরামর্শ দেওয়া পর্যন্ত বা পেশাদার সাহায্য না আসা পর্যন্ত চালিয়ে যান।",
+      te: "30 కంప్రెషన్లు : 2 శ్వాసల లయను మళ్ళీ ప్రారంభించండి. AED సలహా, నిపుణుల సహాయం వచ్చే వరకు లేదా రోగి జీవం యొక్క సంకేతాలు చూపించే వరకు కొనసాగించండి.",
+    }
+  },
+];
+
+const LANG_MAP = { en:'English', hi:'हिंदी', ta:'தமிழ்', bn:'বাংলা', te:'తెలుగు', mr:'मराठी' };
+
+/* ─────────────────────────────────────────
+   BHASHINI API  (real call + Web Speech fallback)
+───────────────────────────────────────── */
+const BHASHINI = {
+  endpoint: 'https://dhruva-api.bhashini.gov.in/services/inference/pipeline',
+  apiKey: 'YOUR_BHASHINI_API_KEY',   // ← replace with real key
+  serviceId: {
+    hi: 'ai4bharat/indic-tts-coqui-indo_aryan-gpu--t4',
+    ta: 'ai4bharat/indic-tts-coqui-dravidian-gpu--t4',
+    bn: 'ai4bharat/indic-tts-coqui-indo_aryan-gpu--t4',
+    te: 'ai4bharat/indic-tts-coqui-dravidian-gpu--t4',
+    mr: 'ai4bharat/indic-tts-coqui-indo_aryan-gpu--t4',
+  }
+};
+
+async function bhashiniTTS(text, lang) {
+  try {
+    const res = await fetch(BHASHINI.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization': BHASHINI.apiKey },
+      body: JSON.stringify({
+        pipelineTasks: [{
+          taskType: 'tts',
+          config: {
+            language: { sourceLanguage: lang },
+            serviceId: BHASHINI.serviceId[lang],
+            gender: 'female',
+            samplingRate: 8000,
+          }
+        }],
+        inputData: { input: [{ source: text }] }
+      })
+    });
+    if (!res.ok) throw new Error('Bhashini HTTP ' + res.status);
+    const data = await res.json();
+    const b64 = data?.pipelineResponse?.[0]?.audio?.[0]?.audioContent;
+    if (b64) {
+      const a = new Audio('data:audio/wav;base64,' + b64);
+      await a.play();
+      return true;
+    }
+  } catch(e) {
+    console.warn('[Bhashini] Falling back to Web Speech:', e.message);
+  }
+  return false;
+}
+
+function webSpeech(text, lang) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = { en:'en-IN', hi:'hi-IN', ta:'ta-IN', bn:'bn-IN', te:'te-IN', mr:'mr-IN' }[lang] || 'en-IN';
+  u.rate = 0.88; u.pitch = 1.05;
+  u.onend = () => stopSpeaking();
+  u.onerror = () => stopSpeaking();
+  speechSynthesis.speak(u);
+}
+
+async function speak() {
+  if (S.speaking) { speechSynthesis.cancel(); stopSpeaking(); return; }
+  const step = STEPS[S.step];
+  const lang = S.lang;
+  const text = lang === 'en' ? step.en : (step.translations[lang] || step.en);
+
+  S.speaking = true;
+  const b = document.getElementById('btn-spk');
+  const l = document.getElementById('spk-lbl');
+  b?.classList.add('active');
+  if(l) l.textContent = 'Speaking…';
+
+  toast('🔊 Bhashini TTS — ' + LANG_MAP[lang], 'ok');
+
+  if (lang !== 'en') {
+    const ok = await bhashiniTTS(text, lang);
+    if (!ok) webSpeech(text, lang);
+  } else {
+    webSpeech(text, lang);
+  }
+  setTimeout(stopSpeaking, 9000);
+}
+
+function stopSpeaking() {
+  S.speaking = false;
+  const b = document.getElementById('btn-spk');
+  const l = document.getElementById('spk-lbl');
+  b?.classList.remove('active');
+  if(l) l.textContent = 'Speak';
+}
+
+/* ─────────────────────────────────────────
+   NAVIGATION
+───────────────────────────────────────── */
+function goTo(id) {
+  speechSynthesis?.cancel(); stopSpeaking();
+  const cur = document.querySelector('.screen.active');
+  if (cur) { cur.style.opacity = '0'; setTimeout(() => { cur.style.display='none'; cur.classList.remove('active'); }, 380); }
+  setTimeout(() => {
+    const nxt = document.getElementById(id);
+    if (!nxt) return;
+    nxt.style.display = 'flex'; nxt.classList.add('active');
+    requestAnimationFrame(() => requestAnimationFrame(() => { nxt.style.opacity = '1'; }));
+    if (id === 's-dash') setTimeout(buildDash, 120);
+  }, 400);
+}
+
+/* ─────────────────────────────────────────
+   LANGUAGE
+───────────────────────────────────────── */
+function setLang(code, el) {
+  S.lang = code;
+  document.querySelectorAll('#land-langs .lp').forEach(b => b.classList.remove('on'));
+  el?.classList.add('on');
+  document.getElementById('lang-badge').textContent = code.toUpperCase() + ' · ' + LANG_MAP[code];
+}
+
+function switchVRLang(code, name, el) {
+  S.lang = code;
+  document.querySelectorAll('#vr-langs .lo').forEach(b => b.classList.remove('on'));
+  el?.classList.add('on');
+  renderStep();
+  toast('🌐 ' + name + ' — Bhashini Active');
+}
+
+/* ─────────────────────────────────────────
+   TRAINING LOGIC
+───────────────────────────────────────── */
+function launchVR() {
+  S.step = 0; S.scores = []; S.clicks = {};
+  S.metrics = { safety:100, precision:100, speed:78 };
+  goTo('s-vr');
+  setTimeout(() => {
+    buildDots();
+    renderStep();
+    startTimer();
+    renderMetrics();
+    toast('🏥 Healthcare CPR Simulation Started');
+  }, 650);
+}
+
+function buildDots() {
+  const c = document.getElementById('h-dots');
+  if (!c) return;
+  c.innerHTML = STEPS.map((_,i) => `<div class="dot ${i===0?'now':''}" id="dot-${i}"></div>`).join('');
+}
+
+function renderStep() {
+  const step = STEPS[S.step];
+  if (!step) return;
+  const lang = S.lang;
+  document.getElementById('s-num').textContent   = `STEP ${String(S.step+1).padStart(2,'0')} / ${String(STEPS.length).padStart(2,'0')}`;
+  document.getElementById('s-title').textContent = step.title;
+  document.getElementById('s-instr').textContent = step.en;
+  document.getElementById('s-hint').textContent  = step.hint || '';
+
+  const natEl = document.getElementById('s-nat');
+  if (lang !== 'en' && step.translations[lang]) {
+    natEl.textContent = step.translations[lang];
+    natEl.style.display = 'block';
+  } else if (lang !== 'en') {
+    natEl.textContent = 'अनुवाद / மொழிபெயர்ப்பு — Bhashini loading…';
+    natEl.style.display = 'block';
+  } else {
+    natEl.style.display = 'none';
+  }
+
+  STEPS.forEach((_,i) => {
+    const d = document.getElementById('dot-'+i);
+    if (!d) return;
+    d.className = 'dot';
+    if (i < S.step) d.classList.add('done');
+    else if (i === S.step) d.classList.add('now');
+  });
+}
+
+function onHotspot(type) {
+  const step = STEPS[S.step];
+  if (!step) return;
+  if (step.hotspot === type) {
+    if (step.multiClick) {
+      S.clicks[S.step] = (S.clicks[S.step]||0) + 1;
+      if (S.clicks[S.step] < step.multiClick) {
+        toast(`💪 ${S.clicks[S.step]}/${step.multiClick} — keep rhythm!`, 'ok');
+        return;
+      }
+    }
+    flashSuccess();
+    toast('✅ Correct! Skill score updated.', 'ok');
+    S.metrics.precision = Math.min(100, S.metrics.precision + 4);
+    renderMetrics();
+    setTimeout(nextStep, 750);
+  } else {
+    toast('⚠️ Wrong object — check the current step!', 'warn');
+    S.metrics.safety    = Math.max(0, S.metrics.safety    - 6);
+    S.metrics.precision = Math.max(0, S.metrics.precision - 3);
+    renderMetrics();
+  }
+}
+
+function nextStep() {
+  S.scores.push(calcStepScore());
+  if (S.step >= STEPS.length - 1) { finishTraining(); return; }
+  S.step++;
+  S.metrics.speed = Math.max(35, Math.min(100, S.metrics.speed + (Math.random()*8 - 3.5)));
+  renderStep(); renderMetrics();
+}
+
+function calcStepScore() {
+  const m = S.metrics;
+  return Math.round(m.safety*0.4 + m.precision*0.4 + m.speed*0.2);
+}
+
+function renderMetrics() {
+  const m = S.metrics;
+  const set = (id, val, color) => {
+    const bar = document.getElementById(id);
+    const txt = document.getElementById(id.replace('m-','v-'));
+    if (bar) bar.style.width = val + '%';
+    if (txt) { txt.textContent = Math.round(val); txt.style.color = color; }
+  };
+  set('m-safety', m.safety,    'var(--green)');
+  set('m-prec',   m.precision, 'var(--cyan)');
+  set('m-speed',  m.speed,     'var(--amber)');
+}
+
+function startTimer() {
+  if (S.timerID) clearInterval(S.timerID);
+  S.startTs = Date.now();
+  S.timerID = setInterval(() => {
+    S.elapsed = Math.floor((Date.now() - S.startTs) / 1000);
+    const m = String(Math.floor(S.elapsed/60)).padStart(2,'0');
+    const s = String(S.elapsed%60).padStart(2,'0');
+    const el = document.getElementById('hud-timer');
+    if (el) el.textContent = `${m}:${s}`;
+    if (S.elapsed > 25) {
+      S.metrics.speed = Math.max(35, S.metrics.speed - 0.04);
+      renderMetrics();
+    }
+  }, 1000);
+}
+
+function flashSuccess() {
+  const ring = document.getElementById('success-fx');
+  const flash = document.getElementById('action-flash');
+  if (ring) { ring.setAttribute('visible', true); setTimeout(() => ring.setAttribute('visible', false), 2200); }
+  if (flash) { flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 400); }
+}
+
+function finishTraining() {
+  clearInterval(S.timerID);
+  toast('🎉 Module Complete! Generating report…', 'ok');
+  setTimeout(() => goTo('s-dash'), 1600);
+}
+
+function retryTraining() { launchVR(); }
+
+/* ─────────────────────────────────────────
+   DASHBOARD
+───────────────────────────────────────── */
+function buildDash() {
+  const m   = S.metrics;
+  const saf = Math.round(m.safety);
+  const prc = Math.round(m.precision);
+  const spd = Math.round(m.speed);
+  const fin = Math.round(saf*0.4 + prc*0.4 + spd*0.2);
+
+  document.getElementById('d-score').textContent = fin;
+  document.getElementById('d-sub').textContent   = `Language: ${LANG_MAP[S.lang]}  ·  Bhashini API`;
+  document.getElementById('d-lang-badge').textContent = S.lang.toUpperCase() + ' · ' + LANG_MAP[S.lang];
+
+  const setBar = (id, val) => {
+    document.getElementById('pb-' + id).style.width = val + '%';
+    document.getElementById('pv-' + id).textContent = val + '%';
+  };
+  setBar('s',   saf);
+  setBar('p',   prc);
+  setBar('sp',  spd);
+  setBar('seq', 100);
+  setBar('aed', 90);
+
+  const mins = String(Math.floor(S.elapsed/60)).padStart(2,'0');
+  const secs = String(S.elapsed%60).padStart(2,'0');
+  document.getElementById('d-time').textContent = `${mins}:${secs}`;
+
+  drawChart();
+}
+
+let chartInst = null;
+function drawChart() {
+  const canvas = document.getElementById('perf-chart');
+  if (!canvas) return;
+  if (chartInst) chartInst.destroy();
+
+  const scores = S.scores.length > 0
+    ? [...S.scores, ...Array(Math.max(0, STEPS.length - S.scores.length)).fill(null)]
+    : STEPS.map(() => 68 + Math.round(Math.random()*27));
+
+  chartInst = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: STEPS.map((st,i) => `S${i+1}`),
+      datasets: [{
+        label: 'Score',
+        data: scores,
+        backgroundColor: scores.map(s => s == null ? 'rgba(255,255,255,0.05)' :
+          s >= 90 ? 'rgba(0,230,118,0.65)' :
+          s >= 75 ? 'rgba(0,229,255,0.6)'  : 'rgba(255,153,51,0.6)'),
+        borderColor: scores.map(s => s == null ? 'transparent' :
+          s >= 90 ? '#00E676' : s >= 75 ? '#00E5FF' : '#FF9933'),
+        borderWidth: 1, borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(7,18,36,0.96)',
+          borderColor: 'rgba(0,229,255,0.3)', borderWidth: 1,
+          titleColor: '#E8F4FD', bodyColor: '#7BACC8',
+          callbacks: { label: ctx => ` Score: ${ctx.parsed.y ?? 'N/A'} / 100` }
+        }
+      },
+      scales: {
+        y: {
+          min:0, max:100,
+          grid: { color:'rgba(255,255,255,0.05)' },
+          ticks: { color:'#3A5A7A', font:{ family:'Space Mono', size:9 } }
+        },
+        x: {
+          grid: { color:'rgba(255,255,255,0.03)' },
+          ticks: { color:'#3A5A7A', font:{ family:'Space Mono', size:9 } }
+        }
+      }
+    }
+  });
+}
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+let _toastT = null;
+function toast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type === 'warn' ? ' warn' : type === 'err' ? ' err' : '');
+  if (_toastT) clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  const land = document.getElementById('s-land');
+  land.style.display = 'flex';
+  land.style.opacity  = '1';
+  setTimeout(() => toast('🚀 PRISM Platform Ready — Select language & begin'), 800);
+});
+</script>
+</body>
+</html>
