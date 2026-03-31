@@ -1,0 +1,149 @@
+/* globals.css — PRISM design system */
+
+/* ── Fonts ─────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── CSS Variables ──────────────────────────────────────────────────────────── */
+:root {
+  --saffron:   #FF9933;
+  --gold:      #FFD700;
+  --cyan:      #00E5FF;
+  --green:     #00E676;
+  --teal:      #00BFA5;
+  --amber:     #FFB300;
+  --red:       #FF1744;
+  --bg-deep:   #020c1b;
+  --bg-card:   #071224;
+  --bg-surface:#0b1928;
+  --border:    rgba(0,229,255,0.12);
+  --txt1:      #E8F4FD;
+  --txt2:      #7BACC8;
+  --txt3:      #3A5A7A;
+  --ff-h:      'Orbitron', sans-serif;
+  --ff-m:      'Space Mono', monospace;
+  --ff-b:      'Inter', sans-serif;
+  --glow-s:    0 0 18px rgba(255,153,51,0.25);
+  --glow-c:    0 0 18px rgba(0,229,255,0.25);
+}
+
+/* ── Reset ──────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  width: 100%; height: 100%;
+  background: var(--bg-deep);
+  color: var(--txt1);
+  font-family: var(--ff-b);
+  overflow: hidden;
+}
+
+/* ── Animated grid background ───────────────────────────────────────────────── */
+.grid-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: gridDrift 20s linear infinite;
+}
+@keyframes gridDrift {
+  from { background-position: 0 0; }
+  to   { background-position: 48px 48px; }
+}
+
+/* ── Entrance animations ────────────────────────────────────────────────────── */
+.anim    { animation: fadeUp .5s ease both; }
+.d1      { animation-delay: .08s; }
+.d2      { animation-delay: .16s; }
+.d3      { animation-delay: .24s; }
+.d4      { animation-delay: .32s; }
+.d5      { animation-delay: .40s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Topbar ─────────────────────────────────────────────────────────────────── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .7rem 1.4rem;
+  background: rgba(7,18,36,0.96);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  flex-shrink: 0; z-index: 50;
+}
+.topbar-logo {
+  font-family: var(--ff-h); font-size: 1.1rem; font-weight: 700;
+  letter-spacing: .25em;
+  background: linear-gradient(135deg, var(--saffron), var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.topbar-right { display: flex; align-items: center; gap: .9rem; }
+
+/* ── Buttons ────────────────────────────────────────────────────────────────── */
+.sm-btn {
+  padding: .32rem .8rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--txt2);
+  font-family: var(--ff-b); font-size: .78rem;
+  cursor: pointer; border-radius: 2;
+  transition: all .2s;
+}
+.sm-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+.btn-cta {
+  padding: .85rem 2.8rem;
+  background: linear-gradient(135deg, var(--saffron) 0%, var(--gold) 100%);
+  color: var(--bg-deep);
+  border: none; font-family: var(--ff-h);
+  font-weight: 700; font-size: 1rem;
+  letter-spacing: .18em; cursor: pointer;
+  clip-path: polygon(14px 0%,100% 0%,calc(100% - 14px) 100%,0% 100%);
+  transition: filter .2s, transform .15s;
+  box-shadow: 0 0 32px rgba(255,153,51,0.35);
+}
+.btn-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* ── Tags ───────────────────────────────────────────────────────────────────── */
+.tag {
+  padding: .18rem .55rem;
+  border-radius: 2px;
+  font-family: var(--ff-m); font-size: .62rem;
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.tc { background: rgba(0,229,255,0.08);  color: var(--cyan);    border: 1px solid rgba(0,229,255,0.2);  }
+.ta { background: rgba(255,153,51,0.08); color: var(--saffron); border: 1px solid rgba(255,153,51,0.2); }
+.tg { background: rgba(0,230,118,0.08);  color: var(--green);   border: 1px solid rgba(0,230,118,0.2);  }
+.tr { background: rgba(255,23,68,0.08);  color: var(--red);     border: 1px solid rgba(255,23,68,0.2);  }
+
+/* ── Bhashini badge ─────────────────────────────────────────────────────────── */
+.bhashini-badge {
+  display: flex; align-items: center; gap: .35rem;
+  padding: .22rem .65rem;
+  background: rgba(0,229,255,0.06);
+  border: 1px solid rgba(0,229,255,0.18);
+  border-radius: 20px;
+  font-family: var(--ff-m); font-size: .65rem;
+  color: var(--cyan); letter-spacing: .08em;
+}
+.dot-live {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
