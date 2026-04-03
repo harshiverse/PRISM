@@ -10,23 +10,51 @@ import useStore from '../store/useStore';
 import { createSession, finalizeSession } from '../services/firebase/firestore';
 import { useSkillMetric } from './useSkillMetric';
 import CPR_STEPS from '../data/steps/healthcare';
+import { sfxInteract, sfxViolation, sfxSuccess, sfxProceed } from '../services/audio';
+
+// Map moduleId → step data files (expand as new modules are added)
+const MODULE_STEPS = {
+  'healthcare-cpr': CPR_STEPS,
+  'ev-diagnostics':  CPR_STEPS, // placeholder until ev steps are authored
+  'arduino':         CPR_STEPS, // placeholder until arduino steps are authored
+};
+
+// Map mode → screen name
+const MODE_SCREEN = {
+  practice: 'vr',
+  beginner: 'beginner',
+  ar:       'ar',
+  live:     'vr',   // live uses same VR scene for now; lobby handled in ModuleSelect
+};
 
 export function useTrainingSession() {
   const store = useStore();
   const { computePrecision, applyHotspotResult, applyWrongHotspot } = useSkillMetric();
 
   // ── Launch ────────────────────────────────────────────────────────────────
-  const launch = useCallback(async (moduleId = 'healthcare-cpr') => {
-    store.initTraining(CPR_STEPS);
-    store.setScreen('vr');
+  const launch = useCallback(async (moduleId = 'healthcare-cpr', mode = 'practice') => {
+    const steps = MODULE_STEPS[moduleId] || CPR_STEPS;
+    store.initTraining(steps);
+    store.setMode(mode);
+
+    const targetScreen = MODE_SCREEN[mode] || 'vr';
+    store.setScreen(targetScreen);
 
     const sessionId = await createSession({
-      userId:   'anonymous',   // swap for auth.currentUser.uid when auth added
+      userId:   'anonymous',
       moduleId,
       language: store.lang,
+      mode,
     });
     store.setSession(sessionId, moduleId);
-    store.showToast('🏥 Healthcare CPR Simulation Started');
+
+    const modeLabels = {
+      practice: '🏥 Practice Mode — VR Simulation Started',
+      beginner: '📱 Beginner Mode — Gyroscope Viewer Started',
+      ar:       '🥽 AR Pro Mode — Spatial Tracking Active',
+      live:     '⚡ Live Mode — Joining Challenge',
+    };
+    store.showToast(modeLabels[mode] || '▶ Training Started');
   }, [store]);
 
   // ── Hotspot interaction ───────────────────────────────────────────────────
@@ -55,6 +83,7 @@ export function useTrainingSession() {
       const { violated } = await applyHotspotResult(precision);
 
       if (!violated) {
+        sfxInteract();
         store.showToast(`✅ Correct! Precision: ${precision}%`);
         // Brief delay for success FX, then advance
         setTimeout(advanceStep, 750);
@@ -62,6 +91,7 @@ export function useTrainingSession() {
       // If violated: simulation is paused; user must click "Resume" in HUD
     } else {
       applyWrongHotspot();
+      sfxViolation();
       store.showToast('⚠️ Wrong object — check the current step!', 'warn');
     }
   }, [store, computePrecision, applyHotspotResult, applyWrongHotspot]);
@@ -80,6 +110,7 @@ export function useTrainingSession() {
     }
 
     setStep(step + 1);
+    sfxProceed();
     // Small random speed fluctuation between steps
     updateMetrics({
       speed: Math.max(35, Math.min(100, metrics.speed + (Math.random() * 8 - 3.5))),
@@ -97,6 +128,7 @@ export function useTrainingSession() {
     const { sessionId, metrics, scores, elapsed } = useStore.getState();
     const finalScore = Math.round(metrics.safety * 0.4 + metrics.precision * 0.4 + metrics.speed * 0.2);
 
+    sfxSuccess();
     store.showToast('🎉 Module Complete! Generating report…');
 
     await finalizeSession(sessionId, {
@@ -110,7 +142,7 @@ export function useTrainingSession() {
   }, [store]);
 
   // ── Retry ─────────────────────────────────────────────────────────────────
-  const retry = useCallback(() => launch(store.moduleId), [launch, store.moduleId]);
+  const retry = useCallback(() => launch(store.moduleId, store.mode), [launch, store.moduleId, store.mode]);
 
   return { launch, onHotspot, advanceStep, resumeAfterViolation, retry };
 }

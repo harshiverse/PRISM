@@ -6,8 +6,18 @@ import { create } from 'zustand';
 
 const useStore = create((set, get) => ({
   // ── Navigation ──────────────────────────────────────────
-  screen: 'landing',   // 'landing' | 'modules' | 'vr' | 'dashboard'
+  screen: 'landing',   // 'landing' | 'modules' | 'vr' | 'beginner' | 'ar' | 'dashboard'
   setScreen: (s) => set({ screen: s }),
+
+  // ── Auth ───────────────────────────────────────────────
+  user: null,          // Firebase user object { uid, displayName, email, photoURL }
+  setUser: (u) => set({ user: u ? { uid: u.uid, displayName: u.displayName, email: u.email, photoURL: u.photoURL } : null }),
+  authModal: null,     // null | 'login' | 'signup'
+  setAuthModal: (v) => set({ authModal: v }),
+
+  // ── Training mode ────────────────────────────────────────
+  mode: 'practice',    // 'practice' | 'beginner' | 'ar' | 'live'
+  setMode: (m) => set({ mode: m }),
 
   // ── Language ─────────────────────────────────────────────
   lang: 'en',

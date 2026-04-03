@@ -1,6 +1,7 @@
 // src/components/HUD/StepPanel.jsx
 import { useState } from 'react';
 import { cancelSpeech } from '../../services/bhashini';
+import { sfxClick } from '../../services/audio';
 
 export default function StepPanel({ step, total, stepData, lang, onSpeak, onNext }) {
   const [speaking, setSpeaking] = useState(false);
@@ -12,9 +13,15 @@ export default function StepPanel({ step, total, stepData, lang, onSpeak, onNext
     : lang !== 'en' ? 'अनुवाद — Bhashini loading…' : null;
 
   const handleSpeak = () => {
+    sfxClick();
     if (speaking) { cancelSpeech(); setSpeaking(false); return; }
     setSpeaking(true);
     onSpeak({ onEnd: () => setSpeaking(false) });
+  };
+
+  const handleNext = () => {
+    sfxClick();
+    onNext?.();
   };
 
   return (
@@ -71,7 +78,7 @@ export default function StepPanel({ step, total, stepData, lang, onSpeak, onNext
         </button>
 
         <button
-          onClick={onNext}
+          onClick={handleNext}
           style={{
             padding: '.42rem 1.4rem',
             background: 'var(--saffron)', color: 'var(--bg-deep)',

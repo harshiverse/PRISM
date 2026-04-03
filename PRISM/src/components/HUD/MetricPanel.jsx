@@ -8,14 +8,20 @@ const METRICS = [
 ];
 
 export default function MetricPanel({ metrics, elapsed }) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
+
   return (
     <div style={{
-      position: 'absolute', top: 14, right: 14,
+      position: 'absolute', top: isMobile ? 8 : 14, right: isMobile ? 8 : 14,
       background: 'rgba(7,18,36,0.92)',
       border: '1px solid var(--border)',
       backdropFilter: 'blur(10px)',
-      padding: '.9rem 1.05rem', borderRadius: 3,
-      pointerEvents: 'all', minWidth: 195,
+      padding: isMobile ? '.6rem .7rem' : '.9rem 1.05rem',
+      borderRadius: 3,
+      pointerEvents: 'all',
+      minWidth: isMobile ? 140 : 195,
+      transform: isMobile ? 'scale(0.85)' : 'none',
+      transformOrigin: 'top right',
     }}>
       <div style={{
         fontFamily: 'var(--ff-m)', fontSize: '.58rem',
