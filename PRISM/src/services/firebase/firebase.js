@@ -1,9 +1,7 @@
 // src/services/firebase/firebase.js
-// Safe Firebase init — no-ops gracefully when env vars are absent.
-
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getFirestore }  from 'firebase/firestore';
+import { getAuth }       from 'firebase/auth';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -16,35 +14,29 @@ const firebaseConfig = {
   measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-const hasConfig = !!(
-  firebaseConfig.apiKey &&
-  firebaseConfig.projectId &&
-  !firebaseConfig.apiKey.startsWith('your_')
-);
+const hasConfig = !!(firebaseConfig.apiKey && firebaseConfig.projectId &&
+  !firebaseConfig.apiKey.startsWith('your_'));
 
-let app = null;
-let db = null;
-let auth = null;
+let app      = null;
+let db       = null;
+let auth     = null;
 let analytics = null;
 
 if (hasConfig) {
   try {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
+    app  = initializeApp(firebaseConfig);
+    db   = getFirestore(app);
     auth = getAuth(app);
-
-    // Analytics — only in browser contexts that support it
-    isSupported().then((yes) => {
+    // Analytics only works in browser environments (not SSR/Node)
+    isSupported().then(yes => {
       if (yes) analytics = getAnalytics(app);
-    }).catch(() => {});
+    });
   } catch (e) {
     console.warn('[PRISM] Firebase init failed:', e.message);
-    app = db = auth = analytics = null;
+    app = db = auth = null;
   }
 } else {
-  console.warn(
-    '[PRISM] Firebase env vars missing — Firestore disabled. Add keys to .env to enable.'
-  );
+  console.warn('[PRISM] Firebase env vars missing — running without persistence.');
 }
 
 export { db, auth, analytics };
